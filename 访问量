@@ -1,0 +1,62 @@
+# coding: utf-8
+import sys
+import urllib.request
+import socket
+import time
+import re
+import random
+ 
+# 在这里填写你要访问的博客地址
+blog_url = [
+    'https://blog.csdn.net/ob6666/article/details/145976943',
+    'https://blog.csdn.net/ob6666/article/details/145976833',
+    'https://blog.csdn.net/ob6666/article/details/145123983',
+    'https://blog.csdn.net/ob6666/article/details/139040981',
+    'https://blog.csdn.net/ob6666/article/details/143229347',
+]
+ 
+class CSDN:
+    def __init__(self, blog_url=blog_url):
+        self.blog_url = blog_url
+        self.headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+            'Accept-Encoding': 'gzip, deflate',
+            'Connection': 'keep-alive',
+            'Referer': 'https://blog.csdn.net/'
+        }
+ 
+    def open_blog(self, link, timeout=30, sleep_time=10, max_try_num=3):
+        tries = 0
+        while tries < max_try_num:
+            try:
+                req = urllib.request.Request(link, headers=self.headers)
+                with urllib.request.urlopen(req, timeout=timeout) as response:
+                    response.read()
+                print(f"Success! Accessed {link}")
+                print(f"Waiting {sleep_time} seconds before the next request...\n")
+                time.sleep(sleep_time)
+                return True
+            except Exception as e:
+                print(f"Attempt {tries+1} failed for {link}: {e}")
+                tries += 1
+                time.sleep(5)
+        print(f"Failed to access {link} after {max_try_num} attempts.\n")
+        return False
+ 
+    def start(self, max_time=10, sleep_time_start=5, sleep_time_end=15, timeout=30):
+        for i in range(max_time):
+            random_link = random.choice(self.blog_url)
+            print(f"Attempt {i+1}: Visiting {random_link}")
+            self.open_blog(random_link, sleep_time=random.uniform(sleep_time_start, sleep_time_end), timeout=timeout)
+        print("Finished visiting blogs.")
+ 
+if __name__ == "__main__":
+    input_max_time = input("Enter the number of visits (default 10): ")
+    try:
+        max_time = int(input_max_time) if input_max_time.strip() else 10
+    except ValueError:
+        max_time = 10
+ 
+    csdn = CSDN()
+    csdn.start(max_time=max_time)
