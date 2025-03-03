@@ -1,0 +1,61 @@
+# coding: utf-8
+import sys
+import urllib.request
+import socket
+import time
+import re
+import random
+import logging
+
+# 配置日志
+logging.basicConfig(
+    filename="csdn_blog_visits.log",
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s"
+)
+
+# 在这里填写你要访问的博客地址
+blog_url = [
+    'https://blog.csdn.net/sveewg/article/details/145330547?spm=1001.2014.3001.5502',
+    'https://blog.csdn.net/sveewg/article/details/145916865?spm=1001.2014.3001.5502',
+    'https://blog.csdn.net/sveewg/article/details/145325595?spm=1001.2014.3001.5502',
+]
+
+class CSDN:
+    def __init__(self, blog_url=blog_url):
+        self.blog_url = blog_url
+        self.headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+            'Accept-Encoding': 'gzip, deflate',
+            'Connection': 'keep-alive',
+            'Referer': 'https://blog.csdn.net/'
+        }
+
+    def open_blog(self, link, timeout=10, sleep_time=0.1, max_try_num=3):
+        tries = 0
+        while tries < max_try_num:
+            try:
+                req = urllib.request.Request(link, headers=self.headers)
+                with urllib.request.urlopen(req, timeout=timeout) as response:
+                    response.read()
+                logging.info(f"Success! Accessed {link}")
+                time.sleep(sleep_time)
+                return True
+            except Exception as e:
+                logging.warning(f"Attempt {tries+1} failed for {link}: {e}")
+                tries += 1
+                time.sleep(5)
+        logging.error(f"Failed to access {link} after {max_try_num} attempts.")
+        return False
+
+    def start(self, max_time=10, sleep_time=0.1, timeout=30):
+        logging.info("Starting blog visit script...")
+        while True:
+            random_link = random.choice(self.blog_url)
+            logging.info(f"Visiting {random_link}")
+            self.open_blog(random_link, sleep_time=sleep_time, timeout=timeout)
+
+if __name__ == "__main__":
+    csdn = CSDN()
+    csdn.start(sleep_time=10)
